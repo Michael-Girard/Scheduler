@@ -445,7 +445,7 @@ public class Scheduler {
                 last day of the month should also be greyed out.
         */
         final int daysInMonth = firstDayOfMonth.getMonth().length(firstDayOfMonth.isLeapYear());
-        
+        System.out.println(daysInMonth);
         /*
             The firstDayInMonth  and lastDayInMonth variables are used in the for loop 
                 to determine when to stop/start greying out cells. 
@@ -456,13 +456,14 @@ public class Scheduler {
                 space with an entire grey week.
         */
         int firstDayInMonth = firstDayOfMonth.getDayOfWeek().getValue();
-        int lastDayInMonth = firstDayInMonth + daysInMonth;
         if (firstDayInMonth >= 7) firstDayInMonth -= 7;    //If the first day of the month is somehow in the second week (like April 2018), move the first day back a week.
+        int lastDayInMonth = firstDayInMonth + daysInMonth;
         
         /*
             endIndex variable will determine how many days are displayed - either 5 weeks or 6
         */
-        int endIndex = firstDayInMonth + daysInMonth <= 35 ? 35 : 42;
+        //int endIndex = (firstDayInMonth + daysInMonth) <= 35 ? 35 : 42;
+        double endIndex = Math.ceil((firstDayInMonth + daysInMonth) / 7.0) * 7;
         
         /*
             Time to set the labels to their correct text and give the buttons event handlers. 
@@ -535,7 +536,6 @@ public class Scheduler {
                             Label lblAppointment = new Label(entry.toString());
                             lblAppointment.setStyle("-fx-border-color: black;");
                             daysAppointments.getChildren().add(lblAppointment);
-                            System.out.println(currentDayInMonth);
                         }
                     }
                 ++currentDayInMonth;
