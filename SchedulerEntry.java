@@ -56,7 +56,11 @@ public class SchedulerEntry extends ScheduleInfo{
         this.entryDescription = entryDescription;
     }
     //</editor-fold>
-
+    
+    /*
+        Concrete override of toString, to display the label
+            for an appointment on the calendar.
+    */
     @Override
     public String toString() {
         int startHour = getStartTime().getHour();            //Get the start hour
@@ -78,4 +82,28 @@ public class SchedulerEntry extends ScheduleInfo{
                 "\nDescription: " + getEntryDescription();
     }
     
+    /*
+        Concrete override of compareTo, to make sure appointments are
+            displayed in order of earliest first.
+    */
+    @Override
+    public int compareTo(ScheduleInfo entry){
+        if (this.getStartDate().isBefore(entry.getStartDate())){
+            return -1;
+        }
+        else if (this.getStartDate().isAfter(entry.getStartDate())){
+            return 1;
+        }
+        else{
+            if (this.getStartTime().isBefore(entry.getStartTime())){
+                return -1;
+            }
+            else if (this.getStartTime().isAfter(entry.getStartTime())){
+                return 1;
+            }
+            else{
+                return 0;
+            }
+        }
+    }
 }
