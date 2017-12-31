@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -102,10 +103,13 @@ public class Scheduler {
 
     public void setEntries(List<ScheduleInfo> appointments) {
         this.entries = appointments;
+        sortEntries();
     }
     
     public boolean addEntry(ScheduleInfo appointment){
-        return entries.add(appointment);
+        boolean added = entries.add(appointment);
+        sortEntries();
+        return added;
     }
     
     public Scene getScene() {
@@ -130,12 +134,19 @@ public class Scheduler {
     }
     
     /*
-        Method allows the modification of the bundle for internationalization
+        setBundle allows the modification of the bundle for internationalization
     */
     public void setBundle(String bundleName, Locale locale){
         bundle = ResourceBundle.getBundle(bundleName, locale);
     }
     //</editor-fold>
+    
+    /*
+        sortEntries ensures entries are sorted and the earliest entries display first
+    */
+    public void sortEntries(){
+        Collections.sort(entries);
+    }
     
     public void showOnStage(){
         if (stage == null){
