@@ -33,9 +33,7 @@ public class SchedulerEntry extends ScheduleInfo{
     }
     
     public SchedulerEntry(LocalDate date, LocalTime start, LocalTime end, String title, String description){
-        startDate = date;
-        startTime = start;
-        endTime = end;
+        super(date, start, end);
         entryTitle = title;
         entryDescription = description;
     }
@@ -61,15 +59,23 @@ public class SchedulerEntry extends ScheduleInfo{
 
     @Override
     public String toString() {
-        int startHour = startTime.getHour();            //Get the start hour
+        int startHour = getStartTime().getHour();            //Get the start hour
         String AMPM = (startHour <= 11 ? "AM" : "PM");  //Assign AM or PM
         if (startHour > 11) startHour -= 12;            //Convert to 12 hour time
-        
+        if (startHour == 0) startHour = 12;
         /*
             Appointments display something like
             "2 PM: Doctor's Appointment"
         */
         return (startHour + " " + AMPM + ": " + getEntryTitle());
+    }
+    
+    public String toStringVerbose(){
+        return "Start Date: " + getStartDate().toString() + 
+                "\nStart Time: " + getStartTime().toString() + 
+                "\nEnd Time: " + getEndTime().toString() + 
+                "\nTitle: " + getEntryTitle() + 
+                "\nDescription: " + getEntryDescription();
     }
     
 }
