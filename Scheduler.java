@@ -207,7 +207,7 @@ public class Scheduler {
         //Create Labels and Buttons
         Label lblTimeSpan = new Label("lblTimeSpan");   //These labels will be adjusted depending
         Label lblBack = new Label("lblBack");           //on the timeSpan for the schedule 
-        Label lblNext = new Label("lblNext");     
+        Label lblNext = new Label("lblNext");
         Button btnBack = new Button("<--");
         Button btnNext = new Button("-->");
         Separator separator = new Separator();
@@ -215,6 +215,12 @@ public class Scheduler {
         lblTimeSpan.setFont(Font.font(FONT_SIZE_LARGE));
         lblBack.setFont(Font.font(FONT_SIZE));
         lblNext.setFont(Font.font(FONT_SIZE));
+        
+        lblTimeSpan.setId("lblTimeSpan");
+        lblBack.setId("lblBack");
+        lblNext.setId("lblNext");
+        btnBack.setId("btnBack");
+        btnNext.setId("btnNext");
         
         controlGrid.add(lblBack, 0, 0);
         controlGrid.add(lblTimeSpan, 1, 0, 1, 2);
@@ -319,19 +325,19 @@ public class Scheduler {
         }
         
         /*
-            Time to set the labels to their correct text. I can get the controlPane
-                from the contentPane, then get the children from the controlPane, 
-                turn it into a stream, and check each one to see if it's a
-                label. Then, I can use the label's default text to see if I have the
-                right label, then change the text to what I desire.
+            Time to set the labels to their correct text and give the buttons event handlers. 
+            I can get the controlPane from the contentPane, then get the children from the 
+                controlPane, turn it into a stream, and check each node to see if it's a
+                label or button. Then, I can use getId to see if I have the
+                right node, then perform the necessary modification.
         */
         final LocalDate dateForLambda = currentDay;
+        System.out.println(currentDay + " " + dateForLambda);
         ((GridPane)contentPane.getTop()).getChildren()
                 .stream()
                 .forEach(node -> {
-                    System.out.println(node);
                     if (node instanceof Label){
-                        switch (((Label) node).getText()){
+                        switch (((Label) node).getId()){
                             case "lblBack":
                                 ((Label) node).setText(bundleExists ? bundle.getString("lblBack") : "Previous Week");
                                 break;
@@ -342,6 +348,20 @@ public class Scheduler {
                                 ((Label) node).setText(bundleExists ? bundle.getString("lblTimeSpan") : 
                                         "Week of " + dateForLambda.getMonth() + " " + dateForLambda.getDayOfMonth());
                                 break;
+                        }
+                    }
+                    if (node instanceof Button){
+                        switch(((Button) node).getId()){
+                            case "btnBack":
+                                ((Button) node).setOnAction(e -> {
+                                    startDateTime = startDateTime.minusWeeks(1);
+                                    createWeeklyCalendar(contentPane);
+                                }); break;
+                            case "btnNext":
+                                ((Button) node).setOnAction(e -> {
+                                    startDateTime = startDateTime.plusWeeks(1);
+                                    createWeeklyCalendar(contentPane);
+                                }); break;
                         }
                     }
                 });
@@ -395,6 +415,8 @@ public class Scheduler {
             currentDay = currentDay.plusDays(1);
             calendarPane.add(day, currentDayInWeek, 1);
         }
+        
+        
     }
     
     private void createMonthlyCalendar(BorderPane contentPane){
