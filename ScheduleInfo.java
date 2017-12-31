@@ -6,15 +6,21 @@ package com.github.michael_girard.scheduler;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public abstract class ScheduleInfo {
+public abstract class ScheduleInfo implements Comparable<ScheduleInfo>{
     /*
         The start date and start/end times of the objects
         being displayed on the scheduler
     */
-    protected LocalDate startDate;
-    protected LocalTime startTime;
-    protected LocalTime endTime;
+    private LocalDate startDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
+    public ScheduleInfo(LocalDate date, LocalTime start, LocalTime end){
+        startDate = date;
+        startTime = start;
+        endTime = end;
+    }
+    
     public LocalDate getStartDate() {
         return startDate;
     }
@@ -41,11 +47,21 @@ public abstract class ScheduleInfo {
     
     /*
         Abstract override of toString, so extending classes must
-        provide their own toString implementation.
+            provide their own toString implementation.
     
         toString is used to determine the label that displays on
-        the graphical scheduler.
+            the graphical scheduler.
     */
     @Override
     public abstract String toString();
+    
+    /*
+        Abstract override of compareTo, so extending classes must
+            provide their own compareTo implementation.
+    
+        compareTo is used to make sure appointments are
+            displayed in order of earliest first.
+    */
+    @Override
+    public abstract int compareTo(ScheduleInfo entry);
 }
