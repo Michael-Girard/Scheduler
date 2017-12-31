@@ -169,9 +169,10 @@ public class Scheduler {
         boolean bundleExists = bundle != null;      //Check if there's a bundle being used
         
         /*
-            Root Pane
+            Root pane and the pane for the calendar and calendar controls
         */
         BorderPane root = new BorderPane();
+        BorderPane contentPane = new BorderPane();
         
         //If we're showing the calendar on its own stage, create a Menu
         if (stage != null){
@@ -180,18 +181,36 @@ public class Scheduler {
             */
             MenuBar menu = new MenuBar();
             Menu menuFile = new Menu(bundleExists ? bundle.getString("menuFile") : "File");
+            MenuItem miSwitchView = new MenuItem(bundleExists ? bundle.getString("miSwitchModes") : "Switch View");
+            switch (timeSpan){
+                case WEEKS: miSwitchView.setText(bundleExists ? bundle.getString("miSwitchViewToMonths") : "Switch to Monthly View"); break;
+                case MONTHS: miSwitchView.setText(bundleExists ? bundle.getString("miSwitchViewToWeeks") : "Switch to Weekly View"); break;
+            }
             MenuItem miExit = new MenuItem(bundleExists ? bundle.getString("miExit") : "Exit");
-            menuFile.getItems().add(miExit);    //Add Exit to File
+            menuFile.getItems().addAll(miSwitchView, miExit);    //Add Exit to File
             menu.getMenus().addAll(menuFile);   //Add File to the Menu
 
-            //<editor-fold defaultstate="collapsed" desc="miExit event handler">
-            miExit.setOnAction(e -> {
-                try{
-                    stage.hide();
+                    //<editor-fold defaultstate="collapsed" desc="miExit event handler">
+        miExit.setOnAction(e -> {
+            try{
+                stage.hide();
+            }
+            catch(NullPointerException ex){
+            }
+        });
+        //</editor-fold>
+
+            //<editor-fold defaultstate="collapsed" desc="miSwitchView event handler">
+            miSwitchView.setOnAction(e -> {
+                if (timeSpan.equals(ChronoUnit.WEEKS)){
+                    timeSpan = ChronoUnit.MONTHS;
+                    createMonthlyCalendar(contentPane);
                 }
-                catch(NullPointerException ex){
-                    ex.printStackTrace();
+                else{
+                    timeSpan = ChronoUnit.WEEKS;
+                    createWeeklyCalendar(contentPane);
                 }
+
             });
             //</editor-fold>
 
@@ -200,7 +219,6 @@ public class Scheduler {
         /*
             Node for containing the navigation controls and the schedule
         */
-        BorderPane contentPane = new BorderPane();
         contentPane.prefWidthProperty().bind(root.widthProperty()); //Set the contentPane to fill the parent's width
         root.setCenter(contentPane);
         
@@ -263,8 +281,6 @@ public class Scheduler {
             case MONTHS: createMonthlyCalendar(contentPane); break;
             default: throw new RuntimeException();      //Should never happen
         }
-        
-        
         
         /*
             Create the scene
