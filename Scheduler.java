@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -40,6 +41,7 @@ public class Scheduler {
     private ChronoUnit timeSpan;         
     private LocalDateTime startDateTime;
     private List<ScheduleInfo> entries;
+    private Stage stage = null;
     private Scene scene;
     private ResourceBundle bundle = null;
     private Font fontType = Font.getDefault();
@@ -135,7 +137,10 @@ public class Scheduler {
     }
     //</editor-fold>
     
-    public void showOnStage(Stage stage){
+    public void showOnStage(){
+        if (stage == null){
+            stage = new Stage();
+        }
         generateContent(stage);
         switch(timeSpan){
             case WEEKS: stage.setTitle("Weekly Calendar"); break;
@@ -241,51 +246,6 @@ public class Scheduler {
         */
         contentPane.setTop(controlGrid);
         
-        /*
-            Grid containing the schedule
-        */
-        GridPane calendarGrid = new GridPane();
-        calendarGrid.setVgap(BORDERS);
-        
-        //Create column constraints
-        numColumns = 7;
-        cc = calendarGrid.getColumnConstraints();
-        for (int currentColumn = 0; currentColumn < numColumns; currentColumn++){
-            ColumnConstraints col = new ColumnConstraints();
-            col.setPercentWidth(Math.ceil(100.0 / numColumns));
-            cc.add(col);
-        }
-        
-        //Create and style day labels
-        Label lblSunday = new Label(bundleExists ? bundle.getString("lblSunday") : "Sunday");
-        Label lblMonday = new Label(bundleExists ? bundle.getString("lblMonday") : "Monday");
-        Label lblTuesday = new Label(bundleExists ? bundle.getString("lblTuesday") : "Tuesday");
-        Label lblWednesday = new Label(bundleExists ? bundle.getString("lblWednesday") : "Wednesday");
-        Label lblThursday = new Label(bundleExists ? bundle.getString("lblThursday") : "Thursday");
-        Label lblFriday = new Label(bundleExists ? bundle.getString("lblFriday") : "Friday");
-        Label lblSaturday = new Label(bundleExists ? bundle.getString("lblSaturday") : "Saturday");
-        
-        GridPane.setHalignment(lblSunday, HPos.CENTER);
-        GridPane.setHalignment(lblMonday, HPos.CENTER);
-        GridPane.setHalignment(lblTuesday, HPos.CENTER);
-        GridPane.setHalignment(lblWednesday, HPos.CENTER);
-        GridPane.setHalignment(lblThursday, HPos.CENTER);
-        GridPane.setHalignment(lblFriday, HPos.CENTER);
-        GridPane.setHalignment(lblSaturday, HPos.CENTER);
-        
-        calendarGrid.add(lblSunday, 0, 0);
-        calendarGrid.add(lblMonday, 1, 0);
-        calendarGrid.add(lblTuesday, 2, 0);
-        calendarGrid.add(lblWednesday, 3, 0);
-        calendarGrid.add(lblThursday, 4, 0);
-        calendarGrid.add(lblFriday, 5, 0);
-        calendarGrid.add(lblSaturday, 6, 0);
-        
-        /*
-            Add the calendarGrid to the contentPane
-        */
-        contentPane.setCenter(calendarGrid);
-        
         //Create the calendar
         switch(timeSpan){
             case WEEKS: createWeeklyCalendar(contentPane); break;
@@ -306,9 +266,61 @@ public class Scheduler {
         }
     }
     
+    private void formatCalendar(GridPane calendarGrid){
+        final boolean bundleExists = bundle != null;      //Check if there's a bundle being used
+        final int BORDERS = 5;
+        
+        //Create column constraints
+        int numColumns = 7;
+        List<ColumnConstraints> cc = calendarGrid.getColumnConstraints();
+        for (int currentColumn = 0; currentColumn < numColumns; currentColumn++){
+            ColumnConstraints col = new ColumnConstraints();
+            col.setPercentWidth(Math.ceil(100.0 / numColumns));
+            cc.add(col);
+        }
+        
+        //Create and style day labels
+        Label lblSunday = new Label(bundleExists ? bundle.getString("lblSunday") : "Sunday");
+        Label lblMonday = new Label(bundleExists ? bundle.getString("lblMonday") : "Monday");
+        Label lblTuesday = new Label(bundleExists ? bundle.getString("lblTuesday") : "Tuesday");
+        Label lblWednesday = new Label(bundleExists ? bundle.getString("lblWednesday") : "Wednesday");
+        Label lblThursday = new Label(bundleExists ? bundle.getString("lblThursday") : "Thursday");
+        Label lblFriday = new Label(bundleExists ? bundle.getString("lblFriday") : "Friday");
+        Label lblSaturday = new Label(bundleExists ? bundle.getString("lblSaturday") : "Saturday");
+        
+        lblSunday.setPadding(new Insets(0, 0, BORDERS, 0));
+        lblMonday.setPadding(new Insets(0, 0, BORDERS, 0));
+        lblTuesday.setPadding(new Insets(0, 0, BORDERS, 0));
+        lblWednesday.setPadding(new Insets(0, 0, BORDERS, 0));
+        lblThursday.setPadding(new Insets(0, 0, BORDERS, 0));
+        lblFriday.setPadding(new Insets(0, 0, BORDERS, 0));
+        lblSaturday.setPadding(new Insets(0, 0, BORDERS, 0));
+        
+        GridPane.setHalignment(lblSunday, HPos.CENTER);
+        GridPane.setHalignment(lblMonday, HPos.CENTER);
+        GridPane.setHalignment(lblTuesday, HPos.CENTER);
+        GridPane.setHalignment(lblWednesday, HPos.CENTER);
+        GridPane.setHalignment(lblThursday, HPos.CENTER);
+        GridPane.setHalignment(lblFriday, HPos.CENTER);
+        GridPane.setHalignment(lblSaturday, HPos.CENTER);
+        
+        calendarGrid.add(lblSunday, 0, 0);
+        calendarGrid.add(lblMonday, 1, 0);
+        calendarGrid.add(lblTuesday, 2, 0);
+        calendarGrid.add(lblWednesday, 3, 0);
+        calendarGrid.add(lblThursday, 4, 0);
+        calendarGrid.add(lblFriday, 5, 0);
+        calendarGrid.add(lblSaturday, 6, 0);
+    }
+    
     private void createWeeklyCalendar(BorderPane contentPane){
         boolean bundleExists = bundle != null;      //Check if there's a bundle being used
-        LocalDate currentDay;
+        
+        /*
+            Create a GridPane to hold the calendar content
+        */
+        GridPane calendarGrid = new GridPane();
+        formatCalendar(calendarGrid);
         
         /*
             Using startDateTime, we need to find the Sunday beginning that week.
@@ -317,6 +329,7 @@ public class Scheduler {
                 calling LocalDate.with(DayOfWeek.SUNDAY), which moves to the next 
                 Sunday, and then backing up a week to the right sunday with minusDays.
         */
+        LocalDate currentDay;
         if (!startDateTime.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
             currentDay = startDateTime.with(DayOfWeek.SUNDAY).minusDays(7).toLocalDate();  
         }
@@ -332,8 +345,8 @@ public class Scheduler {
                 right node, then perform the necessary modification.
         */
         final LocalDate dateForLambda = currentDay;
-        System.out.println(currentDay + " " + dateForLambda);
-        ((GridPane)contentPane.getTop()).getChildren()
+        GridPane controlGrid = (GridPane)contentPane.getTop();
+        controlGrid.getChildren()
                 .stream()
                 .forEach(node -> {
                     if (node instanceof Label){
@@ -350,17 +363,17 @@ public class Scheduler {
                                 break;
                         }
                     }
-                    if (node instanceof Button){
+                    else if (node instanceof Button){
                         switch(((Button) node).getId()){
                             case "btnBack":
                                 ((Button) node).setOnAction(e -> {
                                     startDateTime = startDateTime.minusWeeks(1);
-                                    createWeeklyCalendar(contentPane);
+                                    generateContent(stage);
                                 }); break;
                             case "btnNext":
                                 ((Button) node).setOnAction(e -> {
                                     startDateTime = startDateTime.plusWeeks(1);
-                                    createWeeklyCalendar(contentPane);
+                                    generateContent(stage);
                                 }); break;
                         }
                     }
@@ -374,7 +387,7 @@ public class Scheduler {
                 only have a single child. The FlowPane is set to wrap after each
                 child, and appointments are added to the FlowPane.
         */
-        GridPane calendarPane = (GridPane)contentPane.getCenter();
+        
         final int DAYS_IN_WEEK = 7;
         int currentDayInWeek;
         
@@ -382,12 +395,11 @@ public class Scheduler {
             //Make and style a scrollpane
             ScrollPane day = new ScrollPane();              
             day.setStyle("-fx-background: white;");
-            day.prefHeightProperty().bind(calendarPane.heightProperty());
+            day.prefHeightProperty().bind(calendarGrid.heightProperty());
             
             //Make and style a FlowPane
-            FlowPane daysAppointments = new FlowPane();     //...to hold this flowpane...
-            daysAppointments.setPrefWrapLength(0);          //...to hold all the appointments
-            daysAppointments.prefWidthProperty().bind(day.widthProperty().subtract(2));
+            FlowPane daysAppointments = new FlowPane();
+            daysAppointments.setPrefWrapLength(0);
             
             /*
                 For each entry, check if the entry is for the current day.
@@ -398,14 +410,6 @@ public class Scheduler {
                         //Create a label to display the appointment in a scrollpane
                         Label lblAppointment = new Label(entry.toString());
                         lblAppointment.setStyle("-fx-border-color: black;");
-
-    //                    lblAppointment.setUserData(entry);      //Add the appointment to the UserData, which lets me get it from the event handler
-    //                    //Event handler to let operations happen on double-click
-    //                    lblAppointment.setOnMousePressed(e ->{
-    //                        if (e.getClickCount() >= 2){
-    //                            //Not implemented
-    //                        }
-    //                    });
                         daysAppointments.getChildren().add(lblAppointment);
                     }
                 }
@@ -413,13 +417,139 @@ public class Scheduler {
             
             day.setContent(daysAppointments);
             currentDay = currentDay.plusDays(1);
-            calendarPane.add(day, currentDayInWeek, 1);
+            calendarGrid.add(day, currentDayInWeek, 1);
         }
         
-        
+        contentPane.setCenter(calendarGrid);
     }
     
     private void createMonthlyCalendar(BorderPane contentPane){
+        boolean bundleExists = bundle != null;      //Check if there's a bundle being used
         
+        /*
+            Create a GridPane to hold the calendar content
+        */
+        GridPane calendarGrid = new GridPane();
+        formatCalendar(calendarGrid);
+        
+        /*
+            First, find out the first day of the month. The month isn't likely to
+                start on Sunday, so the part of the week before the first day of 
+                the month should be greyed out.
+        */
+        LocalDate firstDayOfMonth = startDateTime.toLocalDate().withDayOfMonth(1);
+        
+        /*
+            It's also necessary to know the number of days in the month. The month
+                isn't likely to end on Saturday, so the part of the week after the
+                last day of the month should also be greyed out.
+        */
+        final int daysInMonth = firstDayOfMonth.getMonth().length(firstDayOfMonth.isLeapYear());
+        
+        /*
+            The firstDayInMonth  and lastDayInMonth variables are used in the for loop 
+                to determine when to stop/start greying out cells. 
+            
+            Sometimes the first day is in the second week of the month 
+                (somehow - see April 2018), so in those cases a week is 
+                subtracted from the first day because there's no sense in wasting 
+                space with an entire grey week.
+        */
+        int firstDayInMonth = firstDayOfMonth.getDayOfWeek().getValue();
+        int lastDayInMonth = firstDayInMonth + daysInMonth;
+        if (firstDayInMonth >= 7) firstDayInMonth -= 7;    //If the first day of the month is somehow in the second week (like April 2018), move the first day back a week.
+        
+        /*
+            endIndex variable will determine how many days are displayed - either 5 weeks or 6
+        */
+        int endIndex = firstDayInMonth + daysInMonth <= 35 ? 35 : 42;
+        
+        /*
+            Time to set the labels to their correct text and give the buttons event handlers. 
+            I can get the controlPane from the contentPane, then get the children from the 
+                controlPane, turn it into a stream, and check each node to see if it's a
+                label or button. Then, I can use getId to see if I have the
+                right node, then perform the necessary modification.
+        */
+        final LocalDate dateForLambda = startDateTime.toLocalDate();
+        GridPane controlGrid = (GridPane)contentPane.getTop();
+        controlGrid.getChildren()
+                .stream()
+                .forEach(node -> {
+                    if (node instanceof Label){
+                        switch (((Label) node).getId()){
+                            case "lblBack":
+                                ((Label) node).setText(bundleExists ? bundle.getString("lblBack") : "Previous Month");
+                                break;
+                            case "lblNext":
+                                ((Label) node).setText(bundleExists ? bundle.getString("lblNext") : "Next Month");
+                                break;
+                            case "lblTimeSpan":
+                                ((Label) node).setText(bundleExists ? bundle.getString("lblTimeSpan") : 
+                                        "Month of " + dateForLambda.getMonth() + ", " + dateForLambda.getYear());
+                                break;
+                        }
+                    }
+                    else if (node instanceof Button){
+                        switch(((Button) node).getId()){
+                            case "btnBack":
+                                ((Button) node).setOnAction(e -> {
+                                    startDateTime = startDateTime.minusMonths(1);
+                                    createMonthlyCalendar(contentPane);
+                                }); break;
+                            case "btnNext":
+                                ((Button) node).setOnAction(e -> {
+                                    startDateTime = startDateTime.plusMonths(1);
+                                    createMonthlyCalendar(contentPane);
+                                }); break;
+                        }
+                    }
+                });
+        
+        /*
+            And now to create the days. Each day contains a ScrollPane, which
+                allows any number of appointments of any length to fit inside of
+                each day.
+            A FlowPane is inserted into each ScrollPane, since a ScrollPane can
+                only have a single child. The FlowPane is set to wrap after each
+                child, and appointments are added to the FlowPane.
+        */
+        for (int currentDayInCalendar = 0, currentDayInWeek = 0, currentDayInMonth = 1; currentDayInCalendar < endIndex; currentDayInCalendar++, currentDayInWeek++){
+            //Make and style a scrollpane
+            ScrollPane day = new ScrollPane();
+            day.prefHeightProperty().bind(calendarGrid.heightProperty().divide(endIndex == 35 ? 5 : 6));
+            
+            //Make and style a FlowPane
+            FlowPane daysAppointments = new FlowPane();
+            daysAppointments.setPrefWrapLength(1);
+            
+            if (currentDayInCalendar >= firstDayInMonth && currentDayInCalendar < lastDayInMonth){
+                Label lblDay = new Label("\t\t\t  " + String.valueOf(currentDayInMonth));
+                daysAppointments.getChildren().add(lblDay);
+                if (entries != null){
+                    for (ScheduleInfo entry : entries){
+                        if (entry.getStartDate().isEqual(LocalDate.of(startDateTime.getYear(), 
+                                startDateTime.getMonth(), 
+                                startDateTime.withDayOfMonth(currentDayInMonth).getDayOfMonth()))){
+                            //Create a label to display the appointment in a scrollpane
+                            Label lblAppointment = new Label(entry.toString());
+                            lblAppointment.setStyle("-fx-border-color: black;");
+                            daysAppointments.getChildren().add(lblAppointment);
+                            System.out.println(currentDayInMonth);
+                        }
+                    }
+                ++currentDayInMonth;
+            }
+                //ldt = ldt.plusDays(1);
+                day.setContent(daysAppointments);
+            }
+            else{
+                day.setStyle("-fx-background: lightgray;");
+            }
+            
+            if (currentDayInWeek >= 7) currentDayInWeek = 0;
+            calendarGrid.add(day, currentDayInWeek, (int)(currentDayInCalendar / 7) + 1);
+        }
+        contentPane.setCenter(calendarGrid);
     }
 }
