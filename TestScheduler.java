@@ -26,11 +26,14 @@ public class TestScheduler extends Application {
         
         for (int i = 0; i < NUMBER_OF_APPOINTMENTS; i++){
             LocalTime randomTime = LocalTime.of((int)(Math.random() * 22), 1);
+            int randomMonth = (int)(Math.random() * 12 + 1);
+            LocalDate randomDate = LocalDate.of(CURRENT_YEAR, randomMonth, 1);
+            int daysInMonth = randomDate.getMonth().length(randomDate.isLeapYear());
             scheduler.addEntry(new SchedulerEntry(
-                LocalDate.of(CURRENT_YEAR, (int)(Math.random() * 11 + 1), (int)(Math.random() * 27 + 1)),
+                LocalDate.of(CURRENT_YEAR, randomMonth, Math.min((int)(Math.random() * 31 + 1), daysInMonth)),
                 randomTime,
                 randomTime.plusHours(1),
-                "Random Fun",
+                "Random",
                 "qwerty"
             ));       
         }
